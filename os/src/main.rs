@@ -23,7 +23,7 @@ mod sbi;
 #[cfg(feature = "board_qemu")]
 #[path = "boards/qemu.rs"]
 mod board;
-
+//插入入口点的代码
 global_asm!(include_str!("entry.asm"));
 
 /// clear BSS segment
@@ -32,12 +32,14 @@ pub fn clear_bss() {
         fn sbss();
         fn ebss();
     }
+    //lambda来清空bss段(要求)
     (sbss as usize..ebss as usize).for_each(|a| unsafe { (a as *mut u8).write_volatile(0) });
 }
 
 /// the rust entry-point of os
 #[no_mangle]
 pub fn rust_main() -> ! {
+    //这边是定义一些外部变量，以便我们打印出来从而进行debug
     extern "C" {
         fn stext(); // begin addr of text segment
         fn etext(); // end addr of text segment
@@ -52,6 +54,7 @@ pub fn rust_main() -> ! {
     }
     clear_bss();
     println!("Hello, world!");
+    //打印一些段地址信息，然后就没了，ch1就这么点东西
     println!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
     println!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
     println!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
@@ -66,7 +69,7 @@ pub fn rust_main() -> ! {
 
     #[cfg(feature = "board_qemu")]
     crate::board::QEMU_EXIT_HANDLE.exit_success(); // CI autotest success
-    //crate::board::QEMU_EXIT_HANDLE.exit_failure(); // CI autoest failed
+                                                   //crate::board::QEMU_EXIT_HANDLE.exit_failure(); // CI autoest failed
 
     #[cfg(feature = "board_k210")]
     panic!("Unreachable in rust_main!");
