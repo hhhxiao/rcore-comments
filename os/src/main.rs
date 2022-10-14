@@ -65,6 +65,7 @@ fn clear_bss() {
 #[no_mangle]
 /// the rust entry-point of os
 pub fn rust_main() -> ! {
+    //经典清空bss段，这里不赘述了
     clear_bss();
     println!("[kernel] Hello, world!");
     mm::init();

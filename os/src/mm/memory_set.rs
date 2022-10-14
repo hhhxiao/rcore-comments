@@ -60,7 +60,10 @@ impl MemorySet {
             None,
         );
     }
+
+    //往地址空间插入一段新的虚拟内存，也就是map_area(只有一个范围)
     fn push(&mut self, mut map_area: MapArea, data: Option<&[u8]>) {
+        //分配物理页帧，更新页表
         map_area.map(&mut self.page_table);
         if let Some(data) = data {
             map_area.copy_data(&mut self.page_table, data);
@@ -68,18 +71,25 @@ impl MemorySet {
         self.areas.push(map_area);
     }
     /// Mention that trampoline is not collected by areas.
+    /// 在高地址映射一个跳板页面
     fn map_trampoline(&mut self) {
+        //map函数的作用是往页表中添加一个页表项
         self.page_table.map(
+            //TRAMPOLINE是最高地址空间的地址，也就是我们预设的虚拟地址
             VirtAddr::from(TRAMPOLINE).into(),
+            //这边是从汇编外部符号得到的跳板页面的虚拟地址
             PhysAddr::from(strampoline as usize).into(),
             PTEFlags::R | PTEFlags::X,
         );
     }
     /// Without kernel stacks.
+    /// 创建内核地址空间
     pub fn new_kernel() -> Self {
+        //一个空的的地址空间
         let mut memory_set = Self::new_bare();
         // map trampoline
         memory_set.map_trampoline();
+        //下面就是开始映射其他段
         // map kernel sections
         println!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
         println!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
@@ -89,7 +99,10 @@ impl MemorySet {
             sbss_with_stack as usize, ebss as usize
         );
         println!("mapping .text section");
+
+        //一直往下直到映完成所有段
         memory_set.push(
+            //一段虚拟地址映射,由于这边是恒等映射，因此虚拟地址和物理地址相同就行了，下图
             MapArea::new(
                 (stext as usize).into(),
                 (etext as usize).into(),
@@ -98,6 +111,7 @@ impl MemorySet {
             ),
             None,
         );
+
         println!("mapping .rodata section");
         memory_set.push(
             MapArea::new(
@@ -240,6 +254,7 @@ pub struct MapArea {
     map_perm: MapPermission,
 }
 
+//一段连续的虚拟内存映射
 impl MapArea {
     pub fn new(
         start_va: VirtAddr,
@@ -247,21 +262,25 @@ impl MapArea {
         map_type: MapType,
         map_perm: MapPermission,
     ) -> Self {
+        //向上以及向下与4K对齐
         let start_vpn: VirtPageNum = start_va.floor();
         let end_vpn: VirtPageNum = end_va.ceil();
         Self {
-            vpn_range: VPNRange::new(start_vpn, end_vpn),
-            data_frames: BTreeMap::new(),
+            vpn_range: VPNRange::new(start_vpn, end_vpn), //空的range
+            data_frames: BTreeMap::new(),                 //空的map
             map_type,
             map_perm,
         }
     }
+    //为当前也一个虚拟页面分配一个物理页
     pub fn map_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
         let ppn: PhysPageNum;
         match self.map_type {
+            //如果是恒等映射就直接使用虚拟地址作为物理地址
             MapType::Identical => {
                 ppn = PhysPageNum(vpn.0);
             }
+            //如果是普通的映射，就调用物理内存分配器分配一个页面
             MapType::Framed => {
                 let frame = frame_alloc().unwrap();
                 ppn = frame.ppn;
@@ -269,6 +288,7 @@ impl MapArea {
             }
         }
         let pte_flags = PTEFlags::from_bits(self.map_perm.bits).unwrap();
+        //更新页表
         page_table.map(vpn, ppn, pte_flags);
     }
     #[allow(unused)]
@@ -278,6 +298,7 @@ impl MapArea {
         }
         page_table.unmap(vpn);
     }
+    //为当前虚拟内存区域分配物理页帧
     pub fn map(&mut self, page_table: &mut PageTable) {
         for vpn in self.vpn_range {
             self.map_one(page_table, vpn);
