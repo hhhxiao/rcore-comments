@@ -39,6 +39,7 @@ global_asm!(include_str!("entry.asm"));
 global_asm!(include_str!("link_app.S"));
 
 /// clear BSS segment
+/// 这部分也没啥变化
 fn clear_bss() {
     extern "C" {
         fn sbss();
@@ -53,9 +54,11 @@ fn clear_bss() {
 /// the rust entry-point of os
 #[no_mangle]
 pub fn rust_main() -> ! {
+    //这边和ch1相同，还是清除BSS段
     clear_bss();
     println!("[kernel] Hello, world!");
     trap::init();
     batch::init();
+    //请注意，到目前位置，我们的sp指针还是指向boot_stack_top的
     batch::run_next_app();
 }
