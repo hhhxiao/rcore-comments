@@ -17,6 +17,7 @@ pub fn handle_alloc_error(layout: core::alloc::Layout) -> ! {
 static mut HEAP_SPACE: [u8; KERNEL_HEAP_SIZE] = [0; KERNEL_HEAP_SIZE];
 
 /// initiate heap allocator
+/// 这个堆分配器是位于bss段中一段独立的空间
 pub fn init_heap() {
     unsafe {
         HEAP_ALLOCATOR

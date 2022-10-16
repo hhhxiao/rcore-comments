@@ -241,6 +241,7 @@ impl MemorySet {
             asm!("sfence.vma");
         }
     }
+    ///将一个虚拟地址翻译成对应的物理页帧的位置
     pub fn translate(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
         self.page_table.translate(vpn)
     }

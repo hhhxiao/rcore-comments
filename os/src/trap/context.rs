@@ -6,17 +6,17 @@ use riscv::register::sstatus::{self, Sstatus, SPP};
 /// trap context structure containing sstatus, sepc and registers
 pub struct TrapContext {
     /// general regs[0..31]
-    pub x: [usize; 32],
+    pub x: [usize; 32], //和ch2一样还是寄存器
     /// CSR sstatus      
-    pub sstatus: Sstatus,
+    pub sstatus: Sstatus, //状态寄存器
     /// CSR sepc
-    pub sepc: usize,
+    pub sepc: usize, //回调地址
     /// Addr of Page Table
-    pub kernel_satp: usize,
+    pub kernel_satp: usize, //内核地址空间的satp寄存器(可以理解为内核地址空间的句柄)
     /// kernel stack
-    pub kernel_sp: usize,
+    pub kernel_sp: usize, //当前进程的内核栈栈顶指针
     /// Addr of trap_handler function
-    pub trap_handler: usize,
+    pub trap_handler: usize, //trap_handler的虚拟地址(由于用户无法直接访问__trap_handler)
 }
 
 impl TrapContext {

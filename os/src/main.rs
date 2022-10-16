@@ -69,6 +69,7 @@ pub fn rust_main() -> ! {
     clear_bss();
     println!("[kernel] Hello, world!");
     mm::init();
+    //从这开始读取的指令的地址都是虚地址了
     println!("[kernel] back to world!");
     mm::remap_test();
     trap::init();

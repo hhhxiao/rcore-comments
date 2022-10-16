@@ -5,6 +5,9 @@
 .macro LOAD_GP n
     ld x\n, \n*8(sp)
 .endm
+    #trap这段代码被同时映射到用户和内核各自地址空间的同一个虚拟地址中，因此代码执行途中修改了stap(即修改了寄器)，也不影响
+    #这段代码的连续执行
+    #这段空间就是所谓的跳板页面（不同的地址空间的同一虚拟地址映射到了同一个物理页帧）
     .section .text.trampoline
     .globl __alltraps
     .globl __restore
