@@ -168,6 +168,8 @@ impl MemorySet {
     }
     /// Include sections in elf and trampoline and TrapContext and user stack,
     /// also returns user_sp and entry point.
+    /// elf文件内有个program header定义了每个段在虚拟内存中的位置
+    /// 这边主要就是读取这个信息来设定地址空间
     pub fn from_elf(elf_data: &[u8]) -> (Self, usize, usize) {
         let mut memory_set = Self::new_bare();
         // map trampoline

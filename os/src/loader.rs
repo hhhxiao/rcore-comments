@@ -1,6 +1,7 @@
 //! Loading user applications into memory
 
 /// Get the total number of applications.
+/// 获取app总数，这里还是直接调用外部符号
 pub fn get_num_app() -> usize {
     extern "C" {
         fn _num_app();
@@ -9,6 +10,7 @@ pub fn get_num_app() -> usize {
 }
 
 /// get applications data
+/// 从text段读取相应的app数据
 pub fn get_app_data(app_id: usize) -> &'static [u8] {
     extern "C" {
         fn _num_app();

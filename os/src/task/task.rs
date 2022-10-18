@@ -25,7 +25,7 @@ impl TaskControlBlock {
 
     pub fn new(elf_data: &[u8], app_id: usize) -> Self {
         // memory_set with elf program headers/trampoline/trap context/user stack
-        // 读取内核地址空间的相关信息(直接读取elf文件并把每个段映射到对应的地址空间即可)
+        // 读取内核地址空间的相关信息(直接读取位于text段中的elf文件信息并把每个段映射到对应的地址空间即可)
         let (memory_set, user_sp, entry_point) = MemorySet::from_elf(elf_data);
         //trap上下文所在的物理页号
         //

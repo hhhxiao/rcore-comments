@@ -52,6 +52,7 @@ lazy_static! {
     /// a `TaskManager` global instance through lazy_static!
     pub static ref TASK_MANAGER: TaskManager = {
         println!("init TASK_MANAGER");
+        //由于ch4支持堆内存了，因此这里开始使用vector
         let num_app = get_num_app();
         println!("num_app = {}", num_app);
         let mut tasks: Vec<TaskControlBlock> = Vec::new();
@@ -83,6 +84,7 @@ impl TaskManager {
         drop(inner);
         let mut _unused = TaskContext::zero_init();
         // before this, we should drop local variables that must be dropped manually
+        // 这部分和ch3基本一样，直接调用swtich跳到第一个app的执行空间
         unsafe {
             __switch(&mut _unused as *mut _, next_task_cx_ptr);
         }
