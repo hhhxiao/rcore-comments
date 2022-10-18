@@ -115,11 +115,13 @@ pub fn exit_current_and_run_next(exit_code: i32) {
 
 lazy_static! {
     ///Globle process that init user shell
+    /// 初始化进程就是从text段中读出数据板
     pub static ref INITPROC: Arc<TaskControlBlock> = Arc::new(TaskControlBlock::new(
         get_app_data_by_name("initproc").unwrap()
     ));
 }
 ///Add init process to the manager
 pub fn add_initproc() {
+    //add_task就是开始运行数据
     add_task(INITPROC.clone());
 }
