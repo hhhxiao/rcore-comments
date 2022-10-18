@@ -10,6 +10,7 @@ pub struct PidAllocator {
     recycled: Vec<usize>,
 }
 
+//这边就是一个简单的PID分配器
 impl PidAllocator {
     ///Create an empty `PidAllocator`
     pub fn new() -> Self {
@@ -56,7 +57,7 @@ impl Drop for PidHandle {
 pub fn pid_alloc() -> PidHandle {
     PID_ALLOCATOR.exclusive_access().alloc()
 }
-
+/// 根据ch4给出的的内核空间位置，算出内核栈的虚拟地址范围
 /// Return (bottom, top) of a kernel stack in kernel space.
 pub fn kernel_stack_position(app_id: usize) -> (usize, usize) {
     let top = TRAMPOLINE - app_id * (KERNEL_STACK_SIZE + PAGE_SIZE);
@@ -64,6 +65,7 @@ pub fn kernel_stack_position(app_id: usize) -> (usize, usize) {
     (bottom, top)
 }
 ///Kernelstack for app
+/// 内核栈实例，其实就是维护一个pid
 pub struct KernelStack {
     pid: usize,
 }
@@ -80,8 +82,10 @@ impl KernelStack {
         );
         KernelStack { pid: pid_handle.0 }
     }
+
     #[allow(unused)]
     ///Push a value on top of kernelstack
+    ///向内核栈中推入元素
     pub fn push_on_top<T>(&self, value: T) -> *mut T
     where
         T: Sized,
@@ -94,6 +98,7 @@ impl KernelStack {
         ptr_mut
     }
     ///Get the value on the top of kernelstack
+    /// 获取内核栈栈顶8bytes的一个元素
     pub fn get_top(&self) -> usize {
         let (_, kernel_stack_top) = kernel_stack_position(self.pid);
         kernel_stack_top

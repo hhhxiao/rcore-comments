@@ -7,6 +7,7 @@
 .endm
     .section .text
     .globl __switch
+#还是任务切换的一段汇编，切换的主要过程就是切换栈指针+一些寄存器的内容
 __switch:
     # __switch(
     #     current_task_cx_ptr: *mut TaskContext,
