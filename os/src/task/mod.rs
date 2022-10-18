@@ -75,6 +75,7 @@ lazy_static! {
 impl TaskManager {
     /// Run the first task in task list.
     ///
+    /// 这边才是关键
     /// Generally, the first task in task list is an idle task (we call it zero process later).
     /// But in ch3, we load apps statically, so the first task is a real app.
     fn run_first_task(&self) -> ! {
@@ -85,9 +86,12 @@ impl TaskManager {
         drop(inner);
         let mut _unused = TaskContext::zero_init();
         // before this, we should drop local variables that must be dropped manually
+        //任务切管，当前上下文指针是一个虚构的指针，第二个参数就是我们的app0，也就是下一个任务，
+
         unsafe {
             __switch(&mut _unused as *mut TaskContext, next_task_cx_ptr);
         }
+        //切换完成后就执行下一个任务了，不可能执行到这条代码(因为换栈了)
         panic!("unreachable in run_first_task!");
     }
 
@@ -139,7 +143,7 @@ impl TaskManager {
             use crate::board::QEMUExit;
             #[cfg(feature = "board_qemu")]
             crate::board::QEMU_EXIT_HANDLE.exit_success();
-            
+
             #[cfg(feature = "board_k210")]
             panic!("All applications completed!");
         }

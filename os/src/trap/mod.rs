@@ -31,6 +31,7 @@ pub fn init() {
     extern "C" {
         fn __alltraps();
     }
+    //和ch2相同，也是王stvec写trap处理程序的入口地址
     unsafe {
         stvec::write(__alltraps as usize, TrapMode::Direct);
     }

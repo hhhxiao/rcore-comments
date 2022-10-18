@@ -59,10 +59,12 @@ fn clear_bss() {
 /// the rust entry-point of os
 #[no_mangle]
 pub fn rust_main() -> ! {
+    //和之前相同，清空bss
     clear_bss();
     println!("[kernel] Hello, world!");
     trap::init();
     loader::load_apps();
+    //下面两个是直接调用接口的时钟中断，不用管
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
     task::run_first_task();
