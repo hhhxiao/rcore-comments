@@ -70,3 +70,5 @@ pub fn rust_main() -> ! {
     task::run_first_task();
     panic!("Unreachable in rust_main!");
 }
+
+//User call yield -> __alltraps -> trap_handler -> __switch --> __restore

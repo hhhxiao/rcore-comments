@@ -122,12 +122,15 @@ impl TaskManager {
 
     /// Switch current `Running` task to the task we have found,
     /// or there is no `Ready` task and we can exit with all applications completed
+    /// 运行下一个任务，也就是切换任务上下文
     fn run_next_task(&self) {
         if let Some(next) = self.find_next_task() {
             let mut inner = self.inner.exclusive_access();
             let current = inner.current_task;
+            //标记下一个任务为运行状态
             inner.tasks[next].task_status = TaskStatus::Running;
             inner.current_task = next;
+            //上下文切换
             let current_task_cx_ptr = &mut inner.tasks[current].task_cx as *mut TaskContext;
             let next_task_cx_ptr = &inner.tasks[next].task_cx as *const TaskContext;
             drop(inner);
